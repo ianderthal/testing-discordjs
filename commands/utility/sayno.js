@@ -5,7 +5,7 @@ module.exports = {
   cooldown: 5,
 	data: new SlashCommandBuilder()
 		.setName('sayno')
-		.setDescription('gives you a creative way to say no'),
+		.setDescription('gives you a creative way to say \'no\''),
 	async execute(interaction) {
 		try {
       await interaction.deferReply();
