@@ -1,7 +1,6 @@
 // test/index.basic.test.js
 const { expect } = require('chai');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const token = require('../config.json').token;
 
 describe('Discord bot basic setup', function () {
   it('should create a Discord client with commands collection', function () {
@@ -13,7 +12,7 @@ describe('Discord bot basic setup', function () {
     expect(client.commands).to.be.instanceOf(Collection);
   });
 
-  it('should have a token defined', function () {
-    expect(token).to.be.a('string').and.not.empty;
+ it('should have a TOKEN environment variable defined', function () {
+    expect(process.env.TOKEN).to.be.a('string').and.not.empty;
   });
 });
