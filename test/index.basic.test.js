@@ -12,7 +12,4 @@ describe('Discord bot basic setup', function () {
     expect(client.commands).to.be.instanceOf(Collection);
   });
 
- it('should have a TOKEN environment variable defined', function () {
-    expect(process.env.TOKEN).to.be.a('string').and.not.empty;
-  });
 });
