@@ -24,3 +24,6 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          NODE_ENV: test
+          TOKEN: ${{ secrets.TOKEN }}
