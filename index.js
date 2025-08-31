@@ -3,12 +3,13 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const dotenv = require('dotenv');
+
+// Decide which env file to load
+const env = process.env.NODE_ENV || 'development';
+dotenv.config({ path: `.env.${env}` });
 
 const token = process.env.TOKEN;
-
-if (!token && process.env.NODE_ENV !== 'test') {
-  throw new Error('Discord bot TOKEN is not set. Define it in .env or as an environment variable.');
-}
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 

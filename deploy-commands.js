@@ -1,10 +1,18 @@
 require('dotenv').config();
 
 const { REST, Routes } = require('discord.js');
-const { clientId, guildId } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
+const dotenv = require('dotenv');
 
+// Decide which env file to load
+const env = process.env.NODE_ENV || 'development';
+dotenv.config({ path: `.env.${env}` });
+
+// Load config file based on environment
+const config = require(`./config.${env}.json`);
+
+const { clientId, guildId } = config;
 const token = process.env.TOKEN;
 
 const commands = [];
