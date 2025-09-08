@@ -9,7 +9,7 @@ const dotenv = require('dotenv');
 const env = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${env}` });
 
-const token = process.env.TOKEN;
+const token = process.env.DISCORD_TOKEN;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 

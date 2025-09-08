@@ -26,4 +26,4 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
-          TOKEN: ${{ secrets.TOKEN }}
+          TOKEN: ${{ secrets.DISCORD_TOKEN }}

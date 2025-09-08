@@ -13,7 +13,7 @@ dotenv.config({ path: `.env.${env}` });
 const config = require(`./config.${env}.json`);
 
 const { clientId, guildId } = config;
-const token = process.env.TOKEN;
+const token = process.env.DISCORD_TOKEN;
 
 const commands = [];
 // Grab all the command folders from the commands directory you created earlier
