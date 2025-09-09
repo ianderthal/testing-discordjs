@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 let accessToken = null;
 let refreshToken = process.env.STRAVA_REFRESH_TOKEN;
 
@@ -25,3 +23,5 @@ async function refreshAccessToken() {
   refreshToken = data.refresh_token;
   return accessToken;
 }
+
+module.exports = { refreshAccessToken };
