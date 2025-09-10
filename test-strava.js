@@ -19,6 +19,6 @@ dotenv.config({ path: `.env.${env}` });
     const data = await res.json();
     console.log("Response JSON:", data);
   } catch (err) {
-    console.error("❌ Error:", err.message);
+    console.error(" Error:", err.message);
   }
 })();
