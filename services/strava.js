@@ -1,5 +1,11 @@
+const fs = require('fs');
+const path = require('path');
+
 let accessToken = null;
 let refreshToken = process.env.STRAVA_REFRESH_TOKEN;
+
+// path to env file
+const ENV_FILE = path.resolve(__dirname, "../.env.development");
 
 // Refresh strava access token using the refresh token
 async function refreshAccessToken() {
@@ -25,7 +31,32 @@ async function refreshAccessToken() {
   const data = await res.json();
   accessToken = data.access_token;
   refreshToken = data.refresh_token;
+
+  // Update the file automatically
+  updateEnvFile("STRAVA_REFRESH_TOKEN", refreshToken);
+
   return accessToken;
+}
+
+// Helper function to write single variable in ENV file
+async function updateEnvFile( key, value ) {
+  try {
+    let envContent = fs.readFileSync(ENV_FILE, "utf8");
+
+    const regex = new RegExp(`^${key}=.*$`, "m");
+    if (regex.test(envContent)) {
+      // Replace line
+      envContent = envContent.replace(regex, `${key}=${value}`);
+    } else {
+      // Append new line
+      envContent += `\n${key}=${value}\n`;
+    }
+
+    fs.writeFileSync(ENV_FILE, envContent, "utf8");
+    console.log(`Updated ${key} in .env`);
+  } catch (err) {
+    console.log(`Failed to update .env: ${error.message}`);
+  }
 }
 
 // Make a request to Strava API with automatic token refresh
