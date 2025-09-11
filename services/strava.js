@@ -32,8 +32,10 @@ async function refreshAccessToken() {
   accessToken = data.access_token;
   refreshToken = data.refresh_token;
 
-  // Update the file automatically
-  updateEnvFile("STRAVA_REFRESH_TOKEN", refreshToken);
+  // Update the file automatically in dev only
+  if (process.env.NODE_ENV === "development") {
+    updateEnvFile("STRAVA_REFRESH_TOKEN", refreshToken);
+  }
 
   return accessToken;
 }
