@@ -10,11 +10,11 @@ dotenv.config({ path: `.env.${env}` });
     console.log("CLIENT_SECRET set?", !!process.env.STRAVA_CLIENT_SECRET);
     console.log("REFRESH_TOKEN (first 8):", process.env.STRAVA_REFRESH_TOKEN?.slice(0, 8));
 
-    // Example 1: Get your athlete profile
+    // Example 1: Get athlete profile
     const profile = await stravaFetch("athlete");
     console.log("Athlete profile:", profile);
 
-    // Example 2: Get your latest activity
+    // Example 2: Get latest activity
     const activities = await stravaFetch("athlete/activities?per_page=1");
     console.log("Latest activity:", activities[0]);
 
