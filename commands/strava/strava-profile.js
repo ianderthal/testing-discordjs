@@ -16,21 +16,25 @@ module.exports = {
       const jsonOutput = "```json\n" + JSON.stringify(profile, null, 2).slice(0, 1900) + "\n```";
 
       const exampleEmbed = new EmbedBuilder()
-        .setColor('FC4C02')
-        .setTitle(`Strava Profile - ${profile.firstname} ${profile.lastname}`)
-        .setURL('https://discord.js.org/')
-        .setAuthor({ name: 'Strava API', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-        .setDescription('Check out this sweet-ass embed from Strava with your profile information')
+        .setColor('FC5200')
+        .setTitle(`Strava Athlete Profile - ${ profile.firstname } ${ profile.lastname }`)
+        .setURL(`https://strava.com/athletes/${ profile.id }`)
+        .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .addFields(
-          { name: 'Profile Information', value: jsonOutput }
+		      { name: 'Location', value: `${ profile.city }, ${ profile.state } - ${ profile.country }`, inline: true },
+		      { name: 'Member Since', value: `${ profile.created_at }`, inline: true },
         )
+        .setImage('https://dgalywyr863hv.cloudfront.net/pictures/athletes/17866718/5098592/3/medium.jpg')
         .setTimestamp()
-        .setFooter({ text: 'Powered by Strava', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+        .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
+        .setFooter({ text: 'Powered by Strava' });
 
       //channel.send({ embeds: [exampleEmbed] });
       await interaction.editReply({ embeds: [exampleEmbed] });
     } catch(err) {
       console.error("Error fetching Strava profile:", err.message);
+      console.error("Error fetching Strava profile:", err);
+      console.error("Stack trace:", err.stack);
       await interaction.editReply("Could not fetch Strava profile.");
     }
 	},
