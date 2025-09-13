@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { stravaFetch } = require("../../services/strava");
+const dayjs = require('dayjs');
 
 module.exports = {
   category: 'strava',
@@ -13,16 +14,16 @@ module.exports = {
     try {
       const profile = await stravaFetch("athlete");
 
-      const jsonOutput = "```json\n" + JSON.stringify(profile, null, 2).slice(0, 1900) + "\n```";
+      const formattedCreatedAtDate = dayjs(`${ profile.created_at }`).format("MM-DD-YYYY");
 
       const exampleEmbed = new EmbedBuilder()
-        .setColor('FC5200')
+        .setColor('#FC5200')
         .setTitle(`Strava Athlete Profile - ${ profile.firstname } ${ profile.lastname }`)
         .setURL(`https://strava.com/athletes/${ profile.id }`)
         .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .addFields(
 		      { name: 'Location', value: `${ profile.city }, ${ profile.state } - ${ profile.country }`, inline: true },
-		      { name: 'Member Since', value: `${ profile.created_at }`, inline: true },
+		      { name: 'Member Since', value: formattedCreatedAtDate, inline: true },
         )
         .setImage('https://dgalywyr863hv.cloudfront.net/pictures/athletes/17866718/5098592/3/medium.jpg')
         .setTimestamp()
