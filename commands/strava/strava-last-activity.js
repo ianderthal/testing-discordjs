@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { stravaFetch } = require("../../services/strava");
+const { metersToMiles, secondsToMinutes, pace } = require("../../utils/stravaHelpers")
 const dayjs = require('dayjs');
 const advancedFormat = require('dayjs/plugin/advancedFormat');
 
@@ -21,37 +22,32 @@ module.exports = {
       // Pick and choose what goes into embed
       const userId = interaction.user.id;
       const formattedDate = dayjs(latest.start_date_local).format("dddd, MMMM D, YYYY [at] hh:mmA");
-      const mapUrl = `https://heatmap-external-a.strava.com/tiles/auth/${latest.map.id}/0/0/0.png`;
-      console.log(mapUrl);
 
-
-      //const lastestJsonOutput = "```json\n" + JSON.stringify(latest, null, 2).slice(0, 1900) + "\n```";
+      const miles = metersToMiles(latest.distance).toFixed(2);
+      const minutes = secondsToMinutes(latest.moving_time);
+      const runPace = pace(latest.distance, latest.moving_time);
 
       // if there are no activities
       if(!latest) {
         await interaction.editReply("No recent Strava activities found.");
       }
 
-      const exampleEmbed = new EmbedBuilder()
+      const activityEmbed = new EmbedBuilder()
         .setColor('#FC5200')
         .setTitle(`${ latest.name }`)
         .setURL(`https://strava.com/activities/${ latest.id }`)
         .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .setDescription(`<@${userId}> on ${formattedDate}`)
         .addFields(
-          { name: 'Type', value: `${ latest.sport_type }`, inline: true },
-          { name: 'Distance', value: `${ latest.distance }`, inline: true },
-          { name: 'Moving Time', value: `${ latest.moving_time }`, inline: true },
-          { name: 'Elapsed Time', value: `${ latest.elapsed_time }`, inline: true },
-          { name: 'Pace', value: '10m19s/mi', inline: true },
-          { name: 'Speed', value: `${ latest.average_speed }`, inline: true },
-          { name: 'Elevation', value: `${ latest.total_elevation_gain }`, inline: true },
+          { name: 'Distance:', value: `${ miles } mi`, inline: true },
+          { name: 'Duration:', value: `${ minutes } min`, inline: true },
+          { name: 'Pace:', value: runPace, inline: true }
         )
-        .setImage(mapUrl)
+        .setImage('https://dgalywyr863hv.cloudfront.net/pictures/athletes/17866718/5098592/3/medium.jpg')
         .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .setFooter({ text: 'Powered by Strava' });
 
-        await interaction.editReply({ embeds: [exampleEmbed] });
+        await interaction.editReply({ embeds: [activityEmbed] });
     } catch(err) {
       console.error("Error fetching Strava activity:", err.message);
       console.error("Error fetching Strava activity:", err);
@@ -62,10 +58,5 @@ module.exports = {
 };
 
 // TODO List
-// change exampleEmbed to a real variable name
 // update similarly in strava-profile.js
-// any image updates that need to be made?
 // timezone offset isn't right
-// mapUrl is broken, doesn't display anything
-// pace needs to be calculated
-// everything needs to be calculated, actually.
