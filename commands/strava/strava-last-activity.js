@@ -1,9 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { stravaFetch } = require("../../services/strava");
-const { metersToMiles, secondsToMinutes, pace } = require("../../utils/stravaHelpers")
+const { metersToMiles, secondsToMinutes, pace, formatActivityDate } = require("../../utils/stravaHelpers")
+
 const dayjs = require('dayjs');
 const advancedFormat = require('dayjs/plugin/advancedFormat');
+const utc = require('dayjs/plugin/utc');
 
+dayjs.extend(utc);
 dayjs.extend(advancedFormat);
 
 module.exports = {
@@ -19,10 +22,12 @@ module.exports = {
       // Fetch the most recent activity
       const activities = await stravaFetch("athlete/activities?per_page=1");
       const latest = activities[0];
+
       // Pick and choose what goes into embed
       const userId = interaction.user.id;
-      const formattedDate = dayjs(latest.start_date_local).format("dddd, MMMM D, YYYY [at] hh:mmA");
 
+      // Calculate and format
+      const formattedDate = formatActivityDate(latest);
       const miles = metersToMiles(latest.distance).toFixed(2);
       const minutes = secondsToMinutes(latest.moving_time);
       const runPace = pace(latest.distance, latest.moving_time);
@@ -56,7 +61,3 @@ module.exports = {
     }
 	},
 };
-
-// TODO List
-// update similarly in strava-profile.js
-// timezone offset isn't right

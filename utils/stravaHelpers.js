@@ -1,3 +1,31 @@
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+/**
+ * Format an activity start date in the correct local timezone.
+ *
+ * @param {Object} activity - Strava activity object
+ * @returns {string} Formatted date like "Saturday, September 13, 2025 at 09:52AM"
+ */
+function formatActivityDate(activity) {
+  if (!activity.start_date) return "Unknown date";
+
+  // Extract timezone from activity (e.g. "(GMT-04:00) America/New_York")
+  let tz = "UTC";
+  if (activity.timezone) {
+    const match = activity.timezone.match(/ ([A-Za-z_]+\/[A-Za-z_]+)/);
+    if (match) tz = match[1];
+  }
+
+  return dayjs.utc(activity.start_date)
+    .tz(tz)
+    .format("dddd, MMMM D, YYYY [at] hh:mmA");
+}
+
 function metersToMiles(meters) {
   return meters / 1609.34;
 }
@@ -31,5 +59,6 @@ function pace(distanceMeters, durationSeconds) {
 module.exports = {
   metersToMiles,
   secondsToMinutes,
-  pace
+  pace,
+  formatActivityDate
 }

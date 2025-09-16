@@ -16,7 +16,7 @@ module.exports = {
 
       const formattedCreatedAtDate = dayjs(`${ profile.created_at }`).format("MM-DD-YYYY");
 
-      const exampleEmbed = new EmbedBuilder()
+      const profileEmbed = new EmbedBuilder()
         .setColor('#FC5200')
         .setTitle(`Strava Athlete Profile - ${ profile.firstname } ${ profile.lastname }`)
         .setURL(`https://strava.com/athletes/${ profile.id }`)
@@ -30,8 +30,7 @@ module.exports = {
         .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .setFooter({ text: 'Powered by Strava' });
 
-      //channel.send({ embeds: [exampleEmbed] });
-      await interaction.editReply({ embeds: [exampleEmbed] });
+      await interaction.editReply({ embeds: [profileEmbed] });
     } catch(err) {
       console.error("Error fetching Strava profile:", err.message);
       console.error("Error fetching Strava profile:", err);
