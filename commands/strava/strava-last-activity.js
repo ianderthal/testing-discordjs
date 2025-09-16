@@ -45,7 +45,7 @@ module.exports = {
         .setDescription(`<@${userId}> on ${formattedDate}`)
         .addFields(
           { name: 'Distance:', value: `${ miles } mi`, inline: true },
-          { name: 'Duration:', value: `${ minutes } min`, inline: true },
+          { name: 'Duration:', value: `${ minutes }`, inline: true },
           { name: 'Pace:', value: runPace, inline: true }
         )
         .setImage('https://dgalywyr863hv.cloudfront.net/pictures/athletes/17866718/5098592/3/medium.jpg')
