@@ -5,6 +5,10 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const dotenv = require('dotenv');
 
+const express = require('express');
+const app = express();
+app.use(express.json());
+
 // Decide which env file to load
 const env = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${env}` });
@@ -46,3 +50,22 @@ for (const file of eventFiles) {
 }
 
 client.login(token);
+
+
+// Express Webhook Endpoint
+app.post("/strava/webhook", async (req, res) => {
+  console.log("Webhook event:", req.body);
+
+  // Send discord message when new activity is created
+  if(req.body.object_type === "activity" && req.body.aspect_type === "create") {
+    const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
+    channel.send("New Strava activity received");
+  }
+
+  res.sendStatus(200);
+});
+
+// Start Express server
+app.listen(3000, () => {
+  console.log("Express server listening on http://localhost:3000");
+});
