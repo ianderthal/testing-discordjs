@@ -1,17 +1,19 @@
-require('dotenv').config();
-
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const dotenv = require('dotenv');
-
-const express = require('express');
-const app = express();
-app.use(express.json());
-
 // Decide which env file to load
 const env = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${env}` });
+
+// Built-in modules
+const fs = require('node:fs');
+const path = require('node:path');
+
+// Third party modules
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const express = require('express');
+
+// Express app
+const app = express();
+app.use(express.json());
 
 const token = process.env.DISCORD_TOKEN;
 
