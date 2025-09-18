@@ -53,6 +53,18 @@ for (const file of eventFiles) {
 
 client.login(token);
 
+// Verification handshake (Strava calls this when you first subscribe)
+app.get("/strava/webhook", (req, res) => {
+  const VERIFY_TOKEN = process.env.STRAVA_VERIFY_TOKEN;
+
+  if (req.query['hub.verify_token'] === VERIFY_TOKEN) {
+    console.log("Strava webhook verified!");
+    res.json({ "hub.challenge": req.query['hub.challenge'] });
+  } else {
+    console.error("Strava webhook verification failed.");
+    res.status(403).send("Verification failed");
+  }
+});
 
 // Express Webhook Endpoint
 app.post("/strava/webhook", async (req, res) => {
@@ -60,8 +72,12 @@ app.post("/strava/webhook", async (req, res) => {
 
   // Send discord message when new activity is created
   if(req.body.object_type === "activity" && req.body.aspect_type === "create") {
-    const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
-    channel.send("New Strava activity received");
+    try {
+      const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
+      channel.send("New Strava activity received");
+    } catch (err) {
+      console.error("Failed to send discord message:", err);
+    }
   }
 
   res.sendStatus(200);
