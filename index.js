@@ -1,13 +1,17 @@
-require('dotenv').config();
-
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const dotenv = require('dotenv');
-
 // Decide which env file to load
 const env = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${env}` });
+
+// Built-in modules
+const fs = require('node:fs');
+const path = require('node:path');
+
+// Third party modules
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
+const express = require('express');
+
+const { createExpressServer } = require("./server/express");
 
 const token = process.env.DISCORD_TOKEN;
 
@@ -46,3 +50,9 @@ for (const file of eventFiles) {
 }
 
 client.login(token);
+
+// Start Express server
+const app = createExpressServer(client);
+app.listen(3000, () => {
+  console.log("Express server listening on http://localhost:3000");
+});
