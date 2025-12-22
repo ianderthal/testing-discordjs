@@ -52,7 +52,10 @@ for (const file of eventFiles) {
 client.login(token);
 
 // Start Express server
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 const app = createExpressServer(client);
-app.listen(3000, () => {
-  console.log("Express server listening on http://localhost:3000");
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server listening on http://${HOST}:${PORT}`);
 });
