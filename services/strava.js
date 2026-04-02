@@ -5,8 +5,8 @@ let currentAthleteId = null;
 
 // Refresh strava access token using the refresh token
 async function refreshAccessToken() {
-  // Always read the current refresh token from process.env
-  const currentRefresh = refreshToken || process.env.STRAVA_REFRESH_TOKEN;
+  const athlete = getAllAthletes()[0];
+  if (!athlete) throw new Error('No athletes in db. Run: node scripts/manage-athletes.js seed');
 
   const res = await fetch("https://www.strava.com/oauth/token", {
     method: "POST",
@@ -15,7 +15,7 @@ async function refreshAccessToken() {
       client_id: process.env.STRAVA_CLIENT_ID,
       client_secret: process.env.STRAVA_CLIENT_SECRET,
       grant_type: "refresh_token",
-      refresh_token: currentRefresh
+      refresh_token: athlete.refresh_token
     })
   });
 
@@ -26,35 +26,12 @@ async function refreshAccessToken() {
 
   const data = await res.json();
   accessToken = data.access_token;
-  refreshToken = data.refresh_token;
+  currentAthleteId = athlete.strava_athlete_id;
 
-  // Update the file automatically in dev only
-  if (process.env.NODE_ENV === "development") {
-    updateEnvFile("STRAVA_REFRESH_TOKEN", refreshToken);
-  }
+  // After successful refresh, save new tokens back to the DB
+  updateAthleteTokens(athlete.strava_athlete_id, data.access_token, data.refresh_token, data.expires_at);
 
   return accessToken;
-}
-
-// Helper function to write single variable in ENV file
-async function updateEnvFile( key, value ) {
-  try {
-    let envContent = fs.readFileSync(ENV_FILE, "utf8");
-
-    const regex = new RegExp(`^${key}=.*$`, "m");
-    if (regex.test(envContent)) {
-      // Replace line
-      envContent = envContent.replace(regex, `${key}=${value}`);
-    } else {
-      // Append new line
-      envContent += `\n${key}=${value}\n`;
-    }
-
-    fs.writeFileSync(ENV_FILE, envContent, "utf8");
-    console.log(`Updated ${key} in .env`);
-  } catch (err) {
-    console.log(`Failed to update .env: ${error.message}`);
-  }
 }
 
 // Make a request to Strava API with automatic token refresh
@@ -82,6 +59,5 @@ async function stravaFetch(endpoint) {
 }
 
 module.exports = {
-  refreshAccessToken,
   stravaFetch
 };
