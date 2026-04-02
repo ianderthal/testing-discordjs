@@ -1,11 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+const { getAllAthletes, updateAthleteTokens } = require('./database');
 
 let accessToken = null;
-let refreshToken = process.env.STRAVA_REFRESH_TOKEN;
-
-// path to env file
-const ENV_FILE = path.resolve(__dirname, "../.env.development");
+let currentAthleteId = null;
 
 // Refresh strava access token using the refresh token
 async function refreshAccessToken() {
