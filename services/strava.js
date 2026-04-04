@@ -69,7 +69,7 @@ async function stravaFetchForAthlete(stravaAthleteId, endpoint) {
   }
 
    const res = await fetch(`https://www.strava.com/api/v3/${endpoint}`, {
-    headers: { Authorization: `Bearer ${athlete.accessToken}` }
+    headers: { Authorization: `Bearer ${athlete.access_token}` }
   });
 
   // Retry once if token has expired
