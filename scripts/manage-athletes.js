@@ -51,7 +51,52 @@ async function seed() {
   console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
 }
 
+function authLink() {
+  const clientId = process.env.STRAVA_CLIENT_ID;
+  if (!clientId) throw new Error('STRAVA_CLIENT_ID not found in env');
+
+  const url = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=http://localhost&response_type=code&scope=activity:read_all`;
+  console.log('Send this URL to the athlete:\n');
+  console.log(url);
+  console.log('\nOnce they authorize, they\'ll be redirected to a URL containing ?code=... - ask them to copy that code and send it to you');
+}
+
+async function add(code) {
+  if (!code) throw new Error('Usage: node scripts/manage-athletes.js add --code <oauth_code>');
+
+  const tokenRes = await fetch('https://www.strava.com/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.STRAVA_CLIENT_ID,
+      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code,
+    }),
+  });
+
+  if (!tokenRes.ok) {
+    const err = await tokenRes.text();
+    throw new Error(`Token exchange failed: ${tokenRes.status} - ${err}`);
+  }
+
+  const tokenData = await tokenRes.json();
+  const athlete = tokenData.athlete;
+
+  addAthlete({
+    strava_athlete_id: athlete.id,
+    access_token: tokenData.access_token,
+    refresh_token: tokenData.refresh_token,
+    token_expires_at: tokenData.expires_at,
+    athlete_name: `${athlete.firstname} ${athlete.lastname}`,
+    profile_picture: athlete.profile,
+  });
+
+  console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
+}
+
 function list() {
+
   const athletes = getAllAthletes();
   if (athletes.length === 0) {
     console.log('No athletes in database.');
@@ -69,6 +114,12 @@ if (command === 'seed') {
   seed().catch(err => { console.error(err.message); process.exit(1); });
 } else if (command === 'list') {
   list();
+} else if (command === 'auth-link') {
+  authLink();
+} else if (command === 'add') {
+  const codeIndex = process.argv.indexOf('--code');
+  const code = codeIndex !== -1 ? process.argv[codeIndex + 1] : null;
+  add(code).catch(err => {console.error(err.message); process.exit(1); });
 } else {
-  console.log('Usage: node scripts/manage-athletes.js <seed|list>');
+  console.log('Usage: node scripts/manage-athletes.js <seed|list|auth-link|add --code <oauth_code>>');
 }
