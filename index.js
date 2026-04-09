@@ -3,6 +3,10 @@ const dotenv = require('dotenv');
 const env = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${env}` });
 
+// Database
+const { initDatabase } = require('./services/database');
+initDatabase();
+
 // Built-in modules
 const fs = require('node:fs');
 const path = require('node:path');

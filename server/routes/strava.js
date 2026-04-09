@@ -1,5 +1,5 @@
 const { createStravaActivityEmbed } = require('../../utils/stravaEmbed')
-const { stravaFetch } = require('../../services/strava')
+const { stravaFetch, stravaFetchForAthlete } = require('../../services/strava')
 
 module.exports = (client) => {
   const router = require("express").Router();
@@ -26,6 +26,14 @@ module.exports = (client) => {
 
     if (req.body.object_type === "activity" && req.body.aspect_type === "create") {
       const activityId = req.body.object_id;
+      const ownerStravaId = req.body.owner_id;
+
+      const { getAthleteByStravaId } = require('../../services/database');
+      const athlete = getAthleteByStravaId(ownerStravaId);
+      if (!athlete) {
+        console.log(`Webhook received for unknown athlete ${ownerStravaId} - ignoring`);
+        return;
+      }
 
       // Background async function
       (async () => {
@@ -35,7 +43,7 @@ module.exports = (client) => {
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
           try {
-            activity = await stravaFetch(`activities/${activityId}`);
+            activity = await stravaFetchForAthlete(ownerStravaId, `activities/${activityId}`);
             console.log(`Successfully fetched activity ${activityId} on attempt ${attempt}`);
             break; // success
           } catch (err) {
@@ -56,7 +64,10 @@ module.exports = (client) => {
 
         try {
           const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
-          const embed = createStravaActivityEmbed(activity);
+          const embed = createStravaActivityEmbed(activity, {
+            athleteName: athlete.athlete_name,
+            profilePicture: athlete.profile_picture,
+          });
           await channel.send({ embeds: [embed] });
           console.log(`Discord message sent for activity ${activityId}`);
         } catch (err) {

@@ -10,3 +10,13 @@
   - copy the correct application ID into the correct files
 - `NODE_ENV=development node deploy-commands.js` for commands
 - `NODE_ENV=production node index.js` to start the server
+
+### Multi-athlete support script commands
+
+- `NODE_ENV=production node scripts/manage-athletes.js list`
+- `NODE_ENV=production node scripts/manage-athletes.js auth-link`
+- `NODE_ENV=production node scripts/manage-athletes.js add --code`
+
+### Restart and save with pm2
+
+- `pm2 restart ecosystemconfig.js --env && pm2 save`
