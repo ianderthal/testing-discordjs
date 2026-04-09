@@ -14,6 +14,7 @@
 ### Multi-athlete support script commands
 
 - `NODE_ENV=production node scripts/manage-athletes.js list`
+- `NODE_ENV=production node scripts/manage-athletes.js auth-link`
 - `NODE_ENV=production node scripts/manage-athletes.js add --code`
 
 ### Restart and save with pm2
