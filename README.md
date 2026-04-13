@@ -19,4 +19,4 @@
 
 ### Restart and save with pm2
 
-- `pm2 restart ecosystemconfig.js --env && pm2 save`
+- `pm2 restart ecosystem.config.js --env production && pm2 save`
