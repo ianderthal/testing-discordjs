@@ -45,7 +45,7 @@ async function seed() {
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
     athlete_name: `${athlete.firstname} ${athlete.lastname}`,
-    profile_picture: athlete.profile,
+    profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
   });
 
   console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
@@ -89,7 +89,7 @@ async function add(code) {
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
     athlete_name: `${athlete.firstname} ${athlete.lastname}`,
-    profile_picture: athlete.profile,
+    profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
   });
 
   console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
