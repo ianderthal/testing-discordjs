@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { metersToMiles, secondsToMinutes, pace, formatActivityDate } = require("./stravaHelpers")
+const { metersToMiles, metersToFormatted, secondsToMinutes, pace, pacePer500m, formatActivityDate } = require("./stravaHelpers")
 
 const dayjs = require('dayjs');
 const advancedFormat = require('dayjs/plugin/advancedFormat');
@@ -8,12 +8,32 @@ const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 dayjs.extend(advancedFormat);
 
+const ROWING_TYPES = ['Rowing', 'VirtualRow'];
+
+// Pick the stat fields to display based on the activity's sport type
+function getActivityFields(activity) {
+  const sportType = activity.sport_type || activity.type;
+  const duration = secondsToMinutes(activity.moving_time);
+
+  if (ROWING_TYPES.includes(sportType)) {
+    return [
+      { name: 'Distance:', value: metersToFormatted(activity.distance), inline: true },
+      { name: 'Duration:', value: duration, inline: true },
+      { name: 'Split:', value: pacePer500m(activity.distance, activity.moving_time), inline: true }
+    ];
+  }
+
+  // Default (running and everything else)
+  return [
+    { name: 'Distance:', value: `${ metersToMiles(activity.distance).toFixed(2) } mi`, inline: true },
+    { name: 'Duration:', value: duration, inline: true },
+    { name: 'Pace:', value: pace(activity.distance, activity.moving_time), inline: true }
+  ];
+}
+
 function createStravaActivityEmbed(activity, options = {}) {
 
   const formattedDate = formatActivityDate(activity);
-  const miles = metersToMiles(activity.distance).toFixed(2);
-  const minutes = secondsToMinutes(activity.moving_time);
-  const runPace = pace(activity.distance, activity.moving_time);
   const { userId, athleteName, profilePicture } = options;
 
   // Choose what goes into embed
@@ -24,11 +44,7 @@ function createStravaActivityEmbed(activity, options = {}) {
     .setTitle(`${ activity.name }`)
     .setURL(`https://strava.com/activities/${ activity.id }`)
     .setDescription(descriptionText)
-    .addFields(
-      { name: 'Distance:', value: `${ miles } mi`, inline: true },
-      { name: 'Duration:', value: `${ minutes }`, inline: true },
-      { name: 'Pace:', value: runPace, inline: true }
-    )
+    .addFields(...getActivityFields(activity))
     .setImage(profilePicture || null)
     .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
     .setFooter({ text: 'Powered by Strava' });

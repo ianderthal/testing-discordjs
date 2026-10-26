@@ -56,9 +56,26 @@ function pace(distanceMeters, durationSeconds) {
   return paceFromSecondsPerMile(secondsPerMile);
 }
 
+// Format meters for display, e.g. 5000 -> "5,000 m"
+function metersToFormatted(meters) {
+  return `${Math.round(meters).toLocaleString("en-US")} m`;
+}
+
+// Rowing split: time per 500m formatted as m:ss.t, e.g. "2:05.3 /500m"
+function pacePer500m(distanceMeters, durationSeconds) {
+  if (distanceMeters === 0) return "0:00.0 /500m";
+  // Round to tenths first so 59.96s becomes 1:00.0 rather than 0:60.0
+  const tenths = Math.round((durationSeconds / (distanceMeters / 500)) * 10);
+  const minutes = Math.floor(tenths / 600);
+  const seconds = ((tenths % 600) / 10).toFixed(1);
+  return `${minutes}:${seconds.padStart(4, "0")} /500m`;
+}
+
 module.exports = {
   metersToMiles,
+  metersToFormatted,
   secondsToMinutes,
   pace,
+  pacePer500m,
   formatActivityDate
 }
