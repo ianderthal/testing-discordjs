@@ -9,11 +9,20 @@ dayjs.extend(utc);
 dayjs.extend(advancedFormat);
 
 const ROWING_TYPES = ['Rowing', 'VirtualRow'];
+const DURATION_ONLY_TYPES = ['Tennis'];
 
 // Pick the stat fields to display based on the activity's sport type
 function getActivityFields(activity) {
   const sportType = activity.sport_type || activity.type;
   const duration = secondsToMinutes(activity.moving_time);
+
+  // No meaningful distance or pace for these, so only show duration.
+  // Use elapsed_time since moving_time drops the time spent standing between points.
+  if (DURATION_ONLY_TYPES.includes(sportType)) {
+    return [
+      { name: 'Duration:', value: secondsToMinutes(activity.elapsed_time), inline: true }
+    ];
+  }
 
   if (ROWING_TYPES.includes(sportType)) {
     return [

@@ -54,6 +54,13 @@ describe('createStravaActivityEmbed', function () {
     expect(values).to.include('2:05.3 /500m');
   });
 
+  it('should show only elapsed duration for tennis', function () {
+    const embed = createStravaActivityEmbed({ ...baseActivity, distance: 0, moving_time: 1800, elapsed_time: 5400, sport_type: 'Tennis' });
+    expect(embed.data.fields).to.have.lengthOf(1);
+    expect(embed.data.fields[0].name).to.equal('Duration:');
+    expect(embed.data.fields[0].value).to.equal('1h30m00s');
+  });
+
   it('should show miles and min/mi for runs', function () {
     const embed = createStravaActivityEmbed({ ...baseActivity, sport_type: 'Run' });
     const values = embed.data.fields.map(f => f.value);
