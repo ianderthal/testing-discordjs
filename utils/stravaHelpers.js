@@ -79,8 +79,18 @@ function stravaId(obj) {
   return String(obj.id);
 }
 
+// JSON.parse reviver for Strava webhook payloads. Webhook events carry
+// object_id and owner_id as bare numbers with no string counterpart, so read
+// them from the raw JSON source text (Node 21+) to avoid rounding 64-bit IDs.
+const WEBHOOK_ID_KEYS = new Set(['object_id', 'owner_id']);
+function stravaWebhookReviver(key, value, context) {
+  if (!WEBHOOK_ID_KEYS.has(key) || typeof value !== 'number') return value;
+  return context?.source ?? String(value);
+}
+
 module.exports = {
   stravaId,
+  stravaWebhookReviver,
   metersToMiles,
   metersToFormatted,
   secondsToMinutes,

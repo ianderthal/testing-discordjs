@@ -1,6 +1,6 @@
 // test/stravaHelpers.test.js
 const { expect } = require('chai');
-const { pacePer500m, metersToFormatted, stravaId } = require('../utils/stravaHelpers');
+const { pacePer500m, metersToFormatted, stravaId, stravaWebhookReviver } = require('../utils/stravaHelpers');
 const { createStravaActivityEmbed } = require('../utils/stravaEmbed');
 
 describe('Rowing helpers', function () {
@@ -69,6 +69,7 @@ describe('createStravaActivityEmbed', function () {
   });
 
   it('should link to the activity using id_str', function () {
+    // eslint-disable-next-line no-loss-of-precision -- simulates a lossy numeric 64-bit id
     const embed = createStravaActivityEmbed({ ...baseActivity, sport_type: 'Run', id: 9223372036854775807, id_str: '9223372036854775807' });
     expect(embed.data.url).to.equal('https://strava.com/activities/9223372036854775807');
   });
@@ -76,10 +77,23 @@ describe('createStravaActivityEmbed', function () {
 
 describe('stravaId', function () {
   it('should prefer id_str over a lossy numeric id', function () {
+    // eslint-disable-next-line no-loss-of-precision -- simulates a lossy numeric 64-bit id
     expect(stravaId({ id: 9223372036854775807, id_str: '9223372036854775807' })).to.equal('9223372036854775807');
   });
 
   it('should fall back to id when id_str is missing', function () {
     expect(stravaId({ id: 12345 })).to.equal('12345');
+  });
+});
+
+describe('stravaWebhookReviver', function () {
+  it('should keep 64-bit webhook IDs exact as strings', function () {
+    const body = JSON.parse(
+      '{"aspect_type":"create","object_id":9223372036854775807,"owner_id":9007199254740993,"event_time":1700000000}',
+      stravaWebhookReviver,
+    );
+    expect(body.object_id).to.equal('9223372036854775807');
+    expect(body.owner_id).to.equal('9007199254740993');
+    expect(body.event_time).to.equal(1700000000);
   });
 });
