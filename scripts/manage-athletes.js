@@ -1,6 +1,7 @@
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 const { initDatabase, addAthlete, getAllAthletes } = require('../services/database');
+const { stravaId } = require('../utils/stravaHelpers');
 
 const command = process.argv[2];
 
@@ -40,7 +41,7 @@ async function seed() {
   const athlete = await athleteRes.json();
 
   addAthlete({
-    strava_athlete_id: athlete.id,
+    strava_athlete_id: stravaId(athlete),
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
@@ -48,7 +49,7 @@ async function seed() {
     profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
   });
 
-  console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
+  console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${stravaId(athlete)})`);
 }
 
 function authLink() {
@@ -84,7 +85,7 @@ async function add(code) {
   const athlete = tokenData.athlete;
 
   addAthlete({
-    strava_athlete_id: athlete.id,
+    strava_athlete_id: stravaId(athlete),
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
@@ -92,7 +93,7 @@ async function add(code) {
     profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
   });
 
-  console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${athlete.id})`);
+  console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${stravaId(athlete)})`);
 }
 
 function list() {
