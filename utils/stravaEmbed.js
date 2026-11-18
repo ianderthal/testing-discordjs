@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { metersToMiles, metersToFormatted, secondsToMinutes, pace, pacePer500m, formatActivityDate } = require("./stravaHelpers")
+const { stravaId, metersToMiles, metersToFormatted, secondsToMinutes, pace, pacePer500m, formatActivityDate } = require("./stravaHelpers")
 
 const dayjs = require('dayjs');
 const advancedFormat = require('dayjs/plugin/advancedFormat');
@@ -51,7 +51,7 @@ function createStravaActivityEmbed(activity, options = {}) {
   return new EmbedBuilder()
     .setColor('#FC5200')
     .setTitle(`${ activity.name }`)
-    .setURL(`https://strava.com/activities/${ activity.id }`)
+    .setURL(`https://strava.com/activities/${ stravaId(activity) }`)
     .setDescription(descriptionText)
     .addFields(...getActivityFields(activity))
     .setImage(profilePicture || null)

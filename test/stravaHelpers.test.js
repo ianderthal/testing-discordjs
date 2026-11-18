@@ -1,6 +1,6 @@
 // test/stravaHelpers.test.js
 const { expect } = require('chai');
-const { pacePer500m, metersToFormatted } = require('../utils/stravaHelpers');
+const { pacePer500m, metersToFormatted, stravaId } = require('../utils/stravaHelpers');
 const { createStravaActivityEmbed } = require('../utils/stravaEmbed');
 
 describe('Rowing helpers', function () {
@@ -66,5 +66,20 @@ describe('createStravaActivityEmbed', function () {
     const values = embed.data.fields.map(f => f.value);
     expect(values).to.include('3.11 mi');
     expect(values.some(v => v.endsWith('min/mi'))).to.equal(true);
+  });
+
+  it('should link to the activity using id_str', function () {
+    const embed = createStravaActivityEmbed({ ...baseActivity, sport_type: 'Run', id: 9223372036854775807, id_str: '9223372036854775807' });
+    expect(embed.data.url).to.equal('https://strava.com/activities/9223372036854775807');
+  });
+});
+
+describe('stravaId', function () {
+  it('should prefer id_str over a lossy numeric id', function () {
+    expect(stravaId({ id: 9223372036854775807, id_str: '9223372036854775807' })).to.equal('9223372036854775807');
+  });
+
+  it('should fall back to id when id_str is missing', function () {
+    expect(stravaId({ id: 12345 })).to.equal('12345');
   });
 });

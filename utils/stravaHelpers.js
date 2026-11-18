@@ -71,7 +71,16 @@ function pacePer500m(distanceMeters, durationSeconds) {
   return `${minutes}:${seconds.padStart(4, "0")} /500m`;
 }
 
+// Strava IDs may exceed Number.MAX_SAFE_INTEGER after June 1, 2027, so prefer
+// the id_str field Strava returns alongside id. Falls back to id for objects
+// that don't include id_str.
+function stravaId(obj) {
+  if (obj.id_str != null) return obj.id_str;
+  return String(obj.id);
+}
+
 module.exports = {
+  stravaId,
   metersToMiles,
   metersToFormatted,
   secondsToMinutes,
