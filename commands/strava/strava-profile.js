@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { stravaFetch } = require("../../services/strava");
 const dayjs = require('dayjs');
+const { stravaId } = require("../../utils/stravaHelpers");
 
 module.exports = {
   category: 'strava',
@@ -19,7 +20,7 @@ module.exports = {
       const profileEmbed = new EmbedBuilder()
         .setColor('#FC5200')
         .setTitle(`Strava Athlete Profile - ${ profile.firstname } ${ profile.lastname }`)
-        .setURL(`https://strava.com/athletes/${ profile.id }`)
+        .setURL(`https://strava.com/athletes/${ stravaId(profile) }`)
         .setAuthor({ name: 'Strava API', iconURL: 'https://cdn.brandfetch.io/idTLzKLmej/w/400/h/400/theme/dark/icon.jpeg?c=1bxid64Mup7aczewSAYMX&t=1668515681500', url: 'https://strava.com' })
         .addFields(
 		      { name: 'Location', value: `${ profile.city }, ${ profile.state } - ${ profile.country }`, inline: true },
