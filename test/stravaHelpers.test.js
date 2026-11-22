@@ -1,6 +1,6 @@
 // test/stravaHelpers.test.js
 const { expect } = require('chai');
-const { pacePer500m, metersToFormatted, stravaId, stravaWebhookReviver } = require('../utils/stravaHelpers');
+const { pacePer500m, metersToFormatted, stravaId, stravaWebhookReviver, profilePictureUrl } = require('../utils/stravaHelpers');
 const { createStravaActivityEmbed } = require('../utils/stravaEmbed');
 
 describe('Rowing helpers', function () {
@@ -95,5 +95,28 @@ describe('stravaWebhookReviver', function () {
     expect(body.object_id).to.equal('9223372036854775807');
     expect(body.owner_id).to.equal('9007199254740993');
     expect(body.event_time).to.equal(1700000000);
+  });
+});
+
+describe('profilePictureUrl', function () {
+  it('should prefer profile_medium when present', function () {
+    const athlete = {
+      profile_medium: 'https://dgalywyr863hv.cloudfront.net/pictures/athletes/1/2/3/medium.jpg',
+      profile: 'https://dgalywyr863hv.cloudfront.net/pictures/athletes/1/2/3/large.jpg'
+    };
+    expect(profilePictureUrl(athlete)).to.equal(athlete.profile_medium);
+  });
+
+  it('should convert a large.jpg profile URL to medium', function () {
+    const athlete = { profile: 'https://dgalywyr863hv.cloudfront.net/pictures/athletes/1/2/3/large.jpg' };
+    expect(profilePictureUrl(athlete)).to.equal('https://dgalywyr863hv.cloudfront.net/pictures/athletes/1/2/3/medium.jpg');
+  });
+
+  it('should return null for the no-photo placeholder', function () {
+    expect(profilePictureUrl({ profile: 'avatar/athlete/large.png', profile_medium: 'avatar/athlete/medium.png' })).to.equal(null);
+  });
+
+  it('should return null when no profile is present', function () {
+    expect(profilePictureUrl({})).to.equal(null);
   });
 });

@@ -1,5 +1,6 @@
 const { createStravaActivityEmbed } = require('../../utils/stravaEmbed')
 const { stravaFetch, stravaFetchForAthlete } = require('../../services/strava')
+const { profilePictureUrl } = require('../../utils/stravaHelpers')
 
 module.exports = (client) => {
   const router = require("express").Router();
@@ -62,11 +63,25 @@ module.exports = (client) => {
 
         if (!activity) return; // all retries failed
 
+        // Refresh the athlete's name and picture so a changed Strava photo
+        // doesn't leave a dead URL in the embed. Fall back to the stored values.
+        let athleteName = athlete.athlete_name;
+        let profilePicture = athlete.profile_picture;
+        try {
+          const { updateAthleteProfile } = require('../../services/database');
+          const profile = await stravaFetchForAthlete(ownerStravaId, 'athlete');
+          athleteName = `${profile.firstname} ${profile.lastname}`;
+          profilePicture = profilePictureUrl(profile);
+          updateAthleteProfile(ownerStravaId, athleteName, profilePicture);
+        } catch (err) {
+          console.error(`Failed to refresh profile for athlete ${ownerStravaId}, using stored values:`, err.message);
+        }
+
         try {
           const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
           const embed = createStravaActivityEmbed(activity, {
-            athleteName: athlete.athlete_name,
-            profilePicture: athlete.profile_picture,
+            athleteName,
+            profilePicture,
           });
           await channel.send({ embeds: [embed] });
           console.log(`Discord message sent for activity ${activityId}`);

@@ -79,6 +79,15 @@ function stravaId(obj) {
   return String(obj.id);
 }
 
+// Strava's `profile` is a full CloudFront URL when the athlete has a photo,
+// or a relative placeholder like "avatar/athlete/large.png" when they don't.
+// Return the medium-size URL, or null if there's no usable photo.
+function profilePictureUrl(athlete) {
+  const url = athlete && (athlete.profile_medium || athlete.profile);
+  if (typeof url !== 'string' || !/^https?:\/\//.test(url)) return null;
+  return url.replace('/large.jpg', '/medium.jpg');
+}
+
 // JSON.parse reviver for Strava webhook payloads. Webhook events carry
 // object_id and owner_id as bare numbers with no string counterpart, so read
 // them from the raw JSON source text (Node 21+) to avoid rounding 64-bit IDs.
@@ -90,6 +99,7 @@ function stravaWebhookReviver(key, value, context) {
 
 module.exports = {
   stravaId,
+  profilePictureUrl,
   stravaWebhookReviver,
   metersToMiles,
   metersToFormatted,

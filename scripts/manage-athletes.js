@@ -1,7 +1,8 @@
 require('dotenv').config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
-const { initDatabase, addAthlete, getAllAthletes } = require('../services/database');
-const { stravaId } = require('../utils/stravaHelpers');
+const { initDatabase, addAthlete, getAllAthletes, updateAthleteProfile } = require('../services/database');
+const { stravaId, profilePictureUrl } = require('../utils/stravaHelpers');
+const { stravaFetchForAthlete } = require('../services/strava');
 
 const command = process.argv[2];
 
@@ -46,7 +47,7 @@ async function seed() {
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
     athlete_name: `${athlete.firstname} ${athlete.lastname}`,
-    profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
+    profile_picture: profilePictureUrl(athlete),
   });
 
   console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${stravaId(athlete)})`);
@@ -90,7 +91,7 @@ async function add(code) {
     refresh_token: tokenData.refresh_token,
     token_expires_at: tokenData.expires_at,
     athlete_name: `${athlete.firstname} ${athlete.lastname}`,
-    profile_picture: athlete.profile.replace('/large.jpg', '/medium.jpg'),
+    profile_picture: profilePictureUrl(athlete),
   });
 
   console.log(`Added athlete: ${athlete.firstname} ${athlete.lastname} (Strava ID: ${stravaId(athlete)})`);
@@ -109,6 +110,22 @@ function list() {
   }
 }
 
+// Re-fetch every athlete's name and profile picture from Strava.
+// Picture URLs stop working when an athlete changes their photo.
+async function refreshProfiles() {
+  for (const a of getAllAthletes()) {
+    try {
+      const profile = await stravaFetchForAthlete(a.strava_athlete_id, 'athlete');
+      const picture = profilePictureUrl(profile);
+      updateAthleteProfile(a.strava_athlete_id, `${profile.firstname} ${profile.lastname}`, picture);
+      const changed = picture !== a.profile_picture ? ' (picture updated)' : '';
+      console.log(`Refreshed ${profile.firstname} ${profile.lastname}${changed}: ${picture || 'no photo'}`);
+    } catch (err) {
+      console.error(`Failed to refresh ${a.athlete_name} (${a.strava_athlete_id}): ${err.message}`);
+    }
+  }
+}
+
 initDatabase();
 
 if (command === 'seed') {
@@ -117,10 +134,12 @@ if (command === 'seed') {
   list();
 } else if (command === 'auth-link') {
   authLink();
+} else if (command === 'refresh-profiles') {
+  refreshProfiles().catch(err => { console.error(err.message); process.exit(1); });
 } else if (command === 'add') {
   const codeIndex = process.argv.indexOf('--code');
   const code = codeIndex !== -1 ? process.argv[codeIndex + 1] : null;
   add(code).catch(err => {console.error(err.message); process.exit(1); });
 } else {
-  console.log('Usage: node scripts/manage-athletes.js <seed|list|auth-link|add --code <oauth_code>>');
+  console.log('Usage: node scripts/manage-athletes.js <seed|list|auth-link|refresh-profiles|add --code <oauth_code>>');
 }

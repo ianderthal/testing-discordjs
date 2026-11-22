@@ -88,4 +88,12 @@ function getAthleteByStravaId(stravaId) {
     `).run(accessToken, refreshToken, expiresAt, String(stravaId));
   }
 
-  module.exports = { initDatabase, getAthleteByStravaId, getAllAthletes, addAthlete, updateAthleteTokens };
+  function updateAthleteProfile(stravaId, athleteName, profilePicture) {
+    return db.prepare(`
+      UPDATE athletes
+      SET athlete_name = ?, profile_picture = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE strava_athlete_id = ?
+    `).run(athleteName, profilePicture, String(stravaId));
+  }
+
+  module.exports = { initDatabase, getAthleteByStravaId, getAllAthletes, addAthlete, updateAthleteTokens, updateAthleteProfile };
